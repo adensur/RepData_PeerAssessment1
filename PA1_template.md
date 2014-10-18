@@ -1,10 +1,5 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: "Maksim Gayduk aka Adensur"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Maksim Gayduk aka Adensur  
 
 
 ## Loading and preprocessing the data
@@ -14,18 +9,31 @@ First let's read the code. For this step, file activity.zip has to be in R worki
 
 
 
-```{r}
+
+```r
 con=unz("activity.zip","activity.csv")
 data <- read.csv(con)
 head(data,3)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
 ```
   
   
 As we can see, the second column - date - is just a character factor:  
   
   
-```{r}
+
+```r
 class(data[,2])
+```
+
+```
+## [1] "factor"
 ```
   
   
@@ -33,8 +41,14 @@ And the third column - interval - is integer, containing information about time 
   
   
 
-```{r}
+
+```r
 head(data[,3],20)
+```
+
+```
+##  [1]   0   5  10  15  20  25  30  35  40  45  50  55 100 105 110 115 120
+## [18] 125 130 135
 ```
   
   
@@ -42,7 +56,8 @@ That is, the last 2 digits correspond to minutes, while the remaining digits cor
   
   
 
-```{r}
+
+```r
 date<-as.POSIXct(data[,2])
 x=data[,3]
 x=x%/%100*60+x%%100
@@ -50,6 +65,17 @@ x=as.POSIXct(x,origin=date)
 data[,2]=date
 data[,3]=x
 summary(data)
+```
+
+```
+##      steps             date               interval                  
+##  Min.   :  0.00   Min.   :2012-10-01   Min.   :2012-10-01 00:00:00  
+##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.:2012-10-16 00:05:58  
+##  Median :  0.00   Median :2012-10-31   Median :2012-10-31 00:11:57  
+##  Mean   : 37.38   Mean   :2012-10-31   Mean   :2012-10-31 00:11:57  
+##  3rd Qu.: 12.00   3rd Qu.:2012-11-15   3rd Qu.:2012-11-15 00:17:56  
+##  Max.   :806.00   Max.   :2012-11-30   Max.   :2012-11-30 00:23:55  
+##  NA's   :2304
 ```
   
   
@@ -66,7 +92,8 @@ For now, let's just make another, NA-free version of data:
 
 
 
-```{r}
+
+```r
 data2=na.omit(data)
 ```
   
@@ -78,18 +105,26 @@ First of all, lets take a histogram of total steps made each day.
   
   
 
-```{r}
+
+```r
 steps.day=tapply(data2[,1],as.Date(data2[,3]),FUN=sum)
 plot(as.POSIXct(names(steps.day)),steps.day,type="h",lwd=5,xlab="Date",ylab="Total steps per day")
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
   
   
 Now, the mean of total steps taken per day:  
   
   
 
-```{r}
+
+```r
 mean(steps.day)
+```
+
+```
+## [1] 10766.19
 ```
   
   
@@ -97,8 +132,13 @@ And the median:
   
   
 
-```{r}
+
+```r
 median(steps.day)
+```
+
+```
+## [1] 10765
 ```
   
   
@@ -109,7 +149,8 @@ Now lets calculate the number of steps taken per each interval, averaged accross
   
   
 
-```{r}
+
+```r
 x=data2[,3]-data2[,2]                                         ##extract time from times and dates
 steps.interval=tapply(data2[,1],x,FUN=mean)                   ##calculate mean of steps/interval averaged by all days         
 y=steps.interval                                              
@@ -117,14 +158,21 @@ x=levels(as.factor(x))
 x=as.POSIXct(as.numeric(x),origin=data2[1,2])
 plot(x,y,type="l",xlab="Time interval",ylab="Average number of steps")
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
   
   
 Now, to find out which of the intervals contains maximum number of steps on average:  
   
   
 
-```{r}
+
+```r
 strftime(x[which.max(y)],format="%H:%M:%S")
+```
+
+```
+## [1] "00:08:35"
 ```
 
   
@@ -136,16 +184,28 @@ strftime(x[which.max(y)],format="%H:%M:%S")
 ###1. Calculating and reporting a total number of missing values in initial data set:  
 
 
-```{r}
+
+```r
 library(scales)          ##needed to show pretty percentage data
 a=sum(is.na(data[,1]))
 b=percent(sum(is.na(data[,1]))/dim(data)[1])
 a
+```
+
+```
+## [1] 2304
+```
+
+```r
 b
+```
+
+```
+## [1] "13.1%"
 ```
   
   
-So, the total amount of NA's is `r a`, which is `r b` of the total data.  
+So, the total amount of NA's is 2304, which is 13.1% of the total data.  
 
 
 
@@ -158,7 +218,8 @@ Upon manual inspection I saw that some of the days only have NA's, while other d
 Let us prove that fact by splitting the initial set by days and calculating percentage of NA's per each day:  
   
   
-```{r}
+
+```r
 data2=split(data,data[,2])
 y2=vector("numeric")
 for(i in 1:length(data2)){
@@ -166,6 +227,11 @@ for(i in 1:length(data2)){
         y2=c(sum(is.na(x2[,1]))/dim(x2)[1],y2)
 }
 summary(as.factor(y2))
+```
+
+```
+##  0  1 
+## 53  8
 ```
   
   
@@ -178,7 +244,8 @@ Note that the percentage of NA's per day is either 0 or 1, which means that we h
   
   No commentary :D
 
-```{r}
+
+```r
 x=strftime(x,format="%H%M%S")
 for(i in 1:nrow(data)){
         if(is.na(data[i,1])){
@@ -197,19 +264,34 @@ We have already done this, but with slightly different data set
   
 
 
-```{r}
+
+```r
 steps.day=tapply(data[,1],data[,2],FUN=sum)
 plot(as.POSIXct(names(steps.day)),steps.day,type="h",lwd=5,xlab="Date",ylab="Total steps per day")
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
    
    
 Now the mean and the median:  
   
   
 
-```{r}
+
+```r
 mean(steps.day)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(steps.day)
+```
+
+```
+## [1] 10766.19
 ```
   
     
@@ -225,7 +307,8 @@ The mean and the median didn't change that much, but wow - look at that - they a
 Creating a weekday/weekend factor:  
 
 
-```{r}
+
+```r
 library(ggplot2)
 x=weekdays(data[,2])
 wdays=c("Montag","Dienstag","Mittwoch","Donnerstag","Freitag")
@@ -239,6 +322,16 @@ x=as.factor(x)
 data=cbind(data,x)
 head(data)
 ```
+
+```
+##       steps       date            interval       x
+## 1 1.7169811 2012-10-01 2012-10-01 00:00:00 weekday
+## 2 0.3396226 2012-10-01 2012-10-01 00:00:05 weekday
+## 3 0.1320755 2012-10-01 2012-10-01 00:00:10 weekday
+## 4 0.1509434 2012-10-01 2012-10-01 00:00:15 weekday
+## 5 0.0754717 2012-10-01 2012-10-01 00:00:20 weekday
+## 6 2.0943396 2012-10-01 2012-10-01 00:00:25 weekday
+```
   
   
 The rest we already did before = calculate amount of steps taken per interval averaged accross all days, but now separately for weekends and weekdays:  
@@ -246,13 +339,16 @@ The rest we already did before = calculate amount of steps taken per interval av
   
 
 
-```{r}
+
+```r
 data2=data
 data2[,3]=data2[,3]-data2[,2]
 w=aggregate(steps~interval+x,data=data2,FUN=sum)
 w[,1]=as.numeric(w[,1])
 qplot(interval,steps,data=w,facets=.~x,geom="line")
 ```
+
+![](./PA1_template_files/figure-html/unnamed-chunk-17-1.png) 
 
 Nice job slacking out on those weekends, dear test subjects!
 
